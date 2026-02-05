@@ -1,0 +1,40 @@
+# M1: Watermeter Detection - Dependencies
+# Python 3.10+
+
+# Core ML Framework
+torch>=2.0.0
+torchvision>=0.15.0
+
+# Object Detection
+ultralytics>=8.0.0
+
+# Experiment Tracking
+mlflow>=2.0.0
+
+# Computer Vision
+opencv-python>=4.8.0
+opencv-contrib-python>=4.8.0
+
+# Data Processing
+numpy>=1.24.0
+pandas>=2.0.0
+
+# Utilities
+PyYAML>=6.0
+tqdm>=4.65.0
+pillow>=10.0.0
+
+# Testing
+pytest>=7.0.0
+pytest-cov>=4.0.0
+pytest-benchmark>=4.0.0
+
+# Code Quality
+black>=23.0.0
+flake8>=6.0.0
+mypy>=1.0.0
+
+# Development
+ipython>=8.0.0
+jupyter>=1.0.0
+matplotlib>=3.7.0

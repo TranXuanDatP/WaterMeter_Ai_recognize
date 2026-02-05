@@ -1,0 +1,74 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+# Virtual Environment
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Jupyter Notebook
+.ipynb_checkpoints
+
+# Model files (large)
+*.pth
+*.pt
+*.onnx
+model/*.pth
+model/*.pt
+
+# Data (large)
+data/raw/
+data/processed/
+data/*.zip
+data/*.tar.gz
+
+# Outputs
+outputs/
+logs/
+*.log
+
+# Test cache
+.pytest_cache/
+.coverage
+htmlcov/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Temporary
+*.tmp
+*.bak
+*.swp
+
+# BMAD folders (internal planning, not for GitHub)
+_bmad/
+_bmad-output/
