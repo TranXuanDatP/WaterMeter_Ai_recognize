@@ -1,0 +1,57 @@
+{
+  "summary": {
+    "total": 5,
+    "successful": 5,
+    "correct": 5,
+    "with_ground_truth": 5,
+    "accuracy": 100.0,
+    "avg_time": 2.2306196212768556
+  },
+  "results": [
+    {
+      "filename": "meter4_00000_00385501ab4d419fa7b0bdf0d9f8451f.jpg",
+      "true_value": "320",
+      "predicted": "320",
+      "success": true,
+      "correct": true,
+      "time": 2.263821601867676,
+      "error": null
+    },
+    {
+      "filename": "meter4_00001_0063ca512d544da9b48d4b0e1cafbd16.jpg",
+      "true_value": "1",
+      "predicted": "1",
+      "success": true,
+      "correct": true,
+      "time": 2.1993212699890137,
+      "error": null
+    },
+    {
+      "filename": "meter4_00002_0065400c46044ebca6528884c8d2dfdc.jpg",
+      "true_value": "304",
+      "predicted": "304",
+      "success": true,
+      "correct": true,
+      "time": 2.1965794563293457,
+      "error": null
+    },
+    {
+      "filename": "meter4_00003_0070e981653c4e0eb2209b78fb3f9ce2.jpg",
+      "true_value": "441",
+      "predicted": "441",
+      "success": true,
+      "correct": true,
+      "time": 2.243340253829956,
+      "error": null
+    },
+    {
+      "filename": "meter4_00004_0074f876a37f4ce9ae42ce8a5c1ae255.jpg",
+      "true_value": "143",
+      "predicted": "143",
+      "success": true,
+      "correct": true,
+      "time": 2.250035524368286,
+      "error": null
+    }
+  ]
+}

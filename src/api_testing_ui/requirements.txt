@@ -1,0 +1,15 @@
+# API Testing UI Requirements
+# Install with: pip install -r requirements.txt
+
+# UI Framework
+streamlit>=1.28.0
+
+# HTTP Client
+requests>=2.31.0
+
+# Image Processing
+Pillow>=10.0.0
+
+# Testing
+pytest>=7.4.0
+pytest-mock>=3.11.0

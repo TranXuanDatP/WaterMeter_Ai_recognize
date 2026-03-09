@@ -72,3 +72,9 @@ Thumbs.db
 # BMAD folders (internal planning, not for GitHub)
 _bmad/
 _bmad-output/
+data/
+results/
+*.db
+*.csv
+*.pt
+mlflow.db
