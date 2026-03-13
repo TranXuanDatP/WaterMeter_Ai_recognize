@@ -1,0 +1,25 @@
+version: '3.8'
+
+services:
+  water-meter-api:
+    # Tải bản Image đầy đủ (đã bao gồm AI Model)
+    image: dichvunuoc/read-watermeter-ai:v2.0-full
+    container_name: water-meter-api
+    
+    # Mở cổng 80 để truy cập trực tiếp qua IP Server
+    ports:
+      - "80:8000"
+    
+    # Tự động khởi động lại nếu Server bị reboot
+    restart: always
+    
+    environment:
+      - PYTHONUNBUFFERED=1
+      - LOG_LEVEL=info
+
+    # Giới hạn tài nguyên để bảo vệ Server
+    deploy:
+      resources:
+        limits:
+          cpus: '2'
+          memory: 4G

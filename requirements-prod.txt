@@ -1,0 +1,25 @@
+# Water Meter AI Recognition - Production Dependencies
+# Optimized for Docker deployment
+
+# FastAPI Server
+fastapi==0.115.0
+uvicorn[standard]==0.32.0
+pydantic==2.9.0
+python-multipart==0.0.12
+
+# Deep Learning
+torch==2.5.0
+torchvision==0.20.0
+ultralytics==8.3.0
+
+# Image Processing (headless for Docker/server)
+opencv-python-headless==4.10.0.84
+pillow==10.4.0
+numpy==1.26.4
+
+# Utilities
+pandas==2.2.3
+tqdm==4.66.5
+
+# HTTP client for health checks
+requests==2.32.3

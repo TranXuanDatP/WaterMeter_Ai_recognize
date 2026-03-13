@@ -521,6 +521,262 @@ def _get_total_count(result: Any) -> int:
 
 
 # =============================================================================
+# PER-IMAGE METRICS COLLECTOR
+# =============================================================================
+
+class PerImageMetricsCollector:
+    """
+    Collect detailed metrics for each image processed through pipeline.
+
+    Features:
+    - Track confidence scores (M1, M3)
+    - Track execution time per stage
+    - Track M3.5 preprocessing parameters
+    - Export to JSON/CSV for error analysis
+
+    Usage:
+        metrics = PerImageMetricsCollector(output_dir="results/pipeline_run")
+
+        # For each image
+        metrics.start_image("image_001.jpg")
+        metrics.add_m1_result(bbox=[x1,y1,x2,y2], confidence=0.95, time_ms=45)
+        metrics.add_m2_result(detected_angle=15.5, correction_angle=-15.5, time_ms=120)
+        metrics.add_m3_result(bbox=[cx1,cy1,cx2,cy2], confidence=0.88, time_ms=38)
+        metrics.add_m3_5_result(threshold=127, num_digits=5, time_ms=25)
+        metrics.add_m4_result(predicted="12345", beam_confidence=0.92, time_ms=85)
+        metrics.finalize_image(true_value="12345", correct=True)
+
+        # After all images
+        metrics.save_csv("pipeline_results.csv")
+        metrics.save_json("pipeline_metrics.json")
+    """
+
+    def __init__(self, output_dir: Union[str, Path] = None):
+        """
+        Initialize metrics collector.
+
+        Args:
+            output_dir: Directory to save CSV/JSON files
+        """
+        self.output_dir = Path(output_dir) if output_dir else Path(".")
+        self.output_dir.mkdir(parents=True, exist_ok=True)
+
+        # Current image being processed
+        self.current_image = None
+        self.current_metrics = {}
+
+        # All collected results
+        self.results = []
+
+    def start_image(self, image_name: str):
+        """Start tracking a new image."""
+        self.current_image = image_name
+        self.current_metrics = {
+            'filename': image_name,
+            'm1_bbox': None,
+            'm1_confidence': None,
+            'm1_time_ms': None,
+            'm2_detected_angle': None,
+            'm2_correction_angle': None,
+            'm2_time_ms': None,
+            'm3_bbox': None,
+            'm3_confidence': None,
+            'm3_time_ms': None,
+            'm3_5_threshold': None,
+            'm3_5_num_digits': None,
+            'm3_5_time_ms': None,
+            'm4_predicted': None,
+            'm4_beam_confidence': None,
+            'm4_time_ms': None,
+            'total_time_ms': None,
+            'true_value': None,
+            'correct': None,
+            'error_stage': None,
+            'error_message': None
+        }
+
+    def add_m1_result(self, bbox: list, confidence: float, time_ms: float):
+        """Add M1 detection result."""
+        self.current_metrics.update({
+            'm1_bbox': bbox,
+            'm1_confidence': confidence,
+            'm1_time_ms': time_ms
+        })
+
+    def add_m2_result(self, detected_angle: float, correction_angle: float, time_ms: float):
+        """Add M2 orientation result."""
+        self.current_metrics.update({
+            'm2_detected_angle': detected_angle,
+            'm2_correction_angle': correction_angle,
+            'm2_time_ms': time_ms
+        })
+
+    def add_m3_result(self, bbox: list, confidence: float, time_ms: float):
+        """Add M3 ROI detection result."""
+        self.current_metrics.update({
+            'm3_bbox': bbox,
+            'm3_confidence': confidence,
+            'm3_time_ms': time_ms
+        })
+
+    def add_m3_5_result(self, threshold: int, num_digits: int, time_ms: float):
+        """Add M3.5 digit extraction result."""
+        self.current_metrics.update({
+            'm3_5_threshold': threshold,
+            'm3_5_num_digits': num_digits,
+            'm3_5_time_ms': time_ms
+        })
+
+    def add_m4_result(self, predicted: str, beam_confidence: float = None, time_ms: float = None):
+        """Add M4 OCR result."""
+        self.current_metrics.update({
+            'm4_predicted': predicted,
+            'm4_beam_confidence': beam_confidence,
+            'm4_time_ms': time_ms
+        })
+
+    def add_error(self, stage: str, error_message: str):
+        """Record error that occurred during processing."""
+        self.current_metrics.update({
+            'error_stage': stage,
+            'error_message': error_message
+        })
+
+    def finalize_image(self, true_value: str = None, correct: bool = None):
+        """Finalize current image metrics and add to results."""
+        if true_value is not None:
+            self.current_metrics['true_value'] = true_value
+        if correct is not None:
+            self.current_metrics['correct'] = correct
+
+        # Calculate total time
+        times = [
+            self.current_metrics.get('m1_time_ms'),
+            self.current_metrics.get('m2_time_ms'),
+            self.current_metrics.get('m3_time_ms'),
+            self.current_metrics.get('m3_5_time_ms'),
+            self.current_metrics.get('m4_time_ms')
+        ]
+        total_time = sum(t for t in times if t is not None)
+        self.current_metrics['total_time_ms'] = total_time
+
+        self.results.append(self.current_metrics)
+        self.current_image = None
+        self.current_metrics = {}
+
+    def save_csv(self, filename: str = "pipeline_detailed_results.csv"):
+        """Save metrics to CSV file."""
+        import pandas as pd
+
+        csv_path = self.output_dir / filename
+        df = pd.DataFrame(self.results)
+        df.to_csv(csv_path, index=False)
+        return csv_path
+
+    def save_json(self, filename: str = "pipeline_metrics.json"):
+        """Save metrics to JSON file."""
+        import json
+        from datetime import datetime
+
+        json_path = self.output_dir / filename
+
+        # Add summary statistics
+        summary = self._compute_summary()
+
+        data = {
+            'timestamp': datetime.now().isoformat(),
+            'total_images': len(self.results),
+            'summary': summary,
+            'results': self.results
+        }
+
+        with open(json_path, 'w', encoding='utf-8') as f:
+            json.dump(data, f, indent=2, ensure_ascii=False)
+
+        return json_path
+
+    def _compute_summary(self) -> dict:
+        """Compute summary statistics from all results."""
+        if not self.results:
+            return {}
+
+        import pandas as pd
+        df = pd.DataFrame(self.results)
+
+        summary = {
+            'total_images': len(df),
+            'successful': len(df[df['error_stage'].isna()]),
+            'errors': len(df[df['error_stage'].notna()]),
+            'correct_predictions': int(df['correct'].sum()) if 'correct' in df.columns else 0,
+            'accuracy': float(df['correct'].mean()) if 'correct' in df.columns else 0
+        }
+
+        # Confidence statistics
+        if 'm1_confidence' in df.columns:
+            m1_conf = df['m1_confidence'].dropna()
+            if len(m1_conf) > 0:
+                summary['m1_confidence'] = {
+                    'mean': float(m1_conf.mean()),
+                    'min': float(m1_conf.min()),
+                    'max': float(m1_conf.max())
+                }
+
+        if 'm3_confidence' in df.columns:
+            m3_conf = df['m3_confidence'].dropna()
+            if len(m3_conf) > 0:
+                summary['m3_confidence'] = {
+                    'mean': float(m3_conf.mean()),
+                    'min': float(m3_conf.min()),
+                    'max': float(m3_conf.max())
+                }
+
+        # Timing statistics
+        if 'total_time_ms' in df.columns:
+            total_time = df['total_time_ms'].dropna()
+            if len(total_time) > 0:
+                summary['timing'] = {
+                    'total_mean_ms': float(total_time.mean()),
+                    'total_min_ms': float(total_time.min()),
+                    'total_max_ms': float(total_time.max())
+                }
+
+        # Error breakdown by stage
+        if 'error_stage' in df.columns:
+            error_counts = df[df['error_stage'].notna()]['error_stage'].value_counts()
+            summary['errors_by_stage'] = error_counts.to_dict()
+
+        return summary
+
+    def get_low_confidence_images(self, module: str = 'm3', threshold: float = 0.5) -> list:
+        """
+        Get images with low confidence scores.
+
+        Args:
+            module: 'm1' or 'm3'
+            threshold: Confidence threshold
+
+        Returns:
+            List of image filenames with low confidence
+        """
+        confidence_col = f'{module}_confidence'
+        return [
+            r['filename'] for r in self.results
+            if r.get(confidence_col) is not None and r[confidence_col] < threshold
+        ]
+
+    def get_error_images(self) -> list:
+        """Get images that had errors during processing."""
+        return [r['filename'] for r in self.results if r.get('error_stage') is not None]
+
+    def get_incorrect_predictions(self) -> list:
+        """Get images with incorrect predictions."""
+        return [
+            r['filename'] for r in self.results
+            if r.get('correct') is not None and not r['correct']
+        ]
+
+
+# =============================================================================
 # PIPELINE-WRITER DECORATOR
 # =============================================================================
 

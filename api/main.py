@@ -409,12 +409,12 @@ app.add_middleware(
 pipeline: Optional[MeterReadingPipeline] = None
 
 
-# Model paths (adjust these to your actual paths)
+# Model paths (Đã sửa thành đường dẫn tương đối chuẩn Docker)
 MODEL_PATHS = {
-    'm1': r"F:\Workspace\Project\model\M1_DetectWatermeter.pt",
-    'm2': r"F:\Workspace\Project\model\m2_angle_model_epoch15_FIXED_COS_SIN.pth",
-    'm3': r"F:\Workspace\Project\model\M3_Roi_Boundingbox.pt",
-    'm4': r"F:\Workspace\Project\model\M4_OCR.pth",
+    'm1': "model/M1_DetectWatermeter.pt",
+    'm2': "model/m2_angle_model_epoch15_FIXED_COS_SIN.pth",
+    'm3': "model/M3_Roi_Boundingbox.pt",
+    'm4': "model/M4_OCR.pth",
 }
 
 

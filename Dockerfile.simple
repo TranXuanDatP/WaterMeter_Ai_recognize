@@ -1,0 +1,38 @@
+# Sử dụng Python slim để giữ dung lượng vừa phải
+FROM python:3.10-slim
+
+# Thiết lập thư mục làm việc
+WORKDIR /app
+
+# 1. Cài đặt các thư viện hệ thống cần thiết cho OpenCV và dọn dẹp bộ nhớ đệm
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender-dev \
+    libgl1 \
+    wget \
+    && rm -rf /var/lib/apt/lists/*
+
+# 2. Copy file yêu cầu thư viện trước để tận dụng Docker Cache
+COPY api/requirements-cpu.txt .
+
+# 3. Cài đặt thư viện Python (Dùng bản CPU để nhẹ và tương thích server không GPU)
+RUN pip install --no-cache-dir -r requirements-cpu.txt
+
+# 4. COPY TOÀN BỘ SOURCE CODE
+COPY api/ ./api/
+COPY src/ ./src/
+
+# 5. [QUAN TRỌNG] COPY MODEL VÀO TRONG IMAGE
+# Lệnh này giúp model đi theo Image lên Docker Hub, người khác không cần file rời
+COPY model/ ./model/
+
+# 6. Tạo các thư mục cần thiết để tránh lỗi khi ghi log/kết quả
+RUN mkdir -p /app/data /app/results /app/logs
+
+# Mở cổng API
+EXPOSE 8000
+
+# Lệnh khởi chạy Server
+CMD ["uvicorn", "api.main:app", "--host", "0.0.0.0", "--port", "8000"]
